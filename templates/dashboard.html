@@ -18,14 +18,14 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-row">
-  <div class="brand-mark logo-wrap">
-    <img src="{{ url_for('static', filename='VDA_logo.png') }}" alt="Viewer Insights logo" class="brand-logo">
-  </div>
-  <div>
-    <p class="eyebrow">Analytics Platform</p>
-    <h1>Viewer Insights</h1>
-  </div>
-</div>
+        <div class="brand-mark logo-wrap">
+          <img src="{{ url_for('static', filename='VDA_logo.png') }}" alt="Viewer Insights logo" class="brand-logo">
+        </div>
+        <div>
+          <p class="eyebrow">Analytics Platform</p>
+          <h1>Viewer Insights</h1>
+        </div>
+      </div>
 
       <section class="filter-card">
         <h2>Filters</h2>
@@ -56,18 +56,18 @@
           <select id="regionFilter" class="input-field"></select>
         </div>
 
-        
         <div class="date-stack">
-  <div class="field-group">
-    <label for="startDate">Start Date</label>
-    <input type="date" id="startDate" class="input-field date-input">
-  </div>
+          <div class="field-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" class="input-field date-input">
+          </div>
 
-  <div class="field-group">
-    <label for="endDate">End Date</label>
-    <input type="date" id="endDate" class="input-field date-input">
-  </div>
-</div>
+          <div class="field-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" class="input-field date-input">
+          </div>
+        </div>
+
         <button id="analysisBtn" class="primary-btn" type="button">Start Analysis</button>
       </section>
 
@@ -120,6 +120,60 @@
             <strong id="avgEngagement">—</strong>
           </article>
         </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">NLP</p>
+            <h3>Text Sentiment Analysis</h3>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <span class="kpi-label">Sentiment</span>
+            <strong id="nlpSentiment">—</strong>
+          </article>
+          <article class="kpi-card">
+            <span class="kpi-label">Positive Score</span>
+            <strong id="nlpPositiveScore">—</strong>
+          </article>
+          <article class="kpi-card">
+            <span class="kpi-label">Negative Score</span>
+            <strong id="nlpNegativeScore">—</strong>
+          </article>
+        </div>
+        <p id="nlpCleanText" class="panel-note"></p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">NLP</p>
+            <h3>Top Keywords</h3>
+          </div>
+        </div>
+        <div id="keywordChips" class="chip-group"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">DL</p>
+            <h3>Trend Forecast</h3>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <span class="kpi-label">Trend</span>
+            <strong id="dlTrend">—</strong>
+          </article>
+          <article class="kpi-card">
+            <span class="kpi-label">Confidence</span>
+            <strong id="dlConfidence">—</strong>
+          </article>
+        </div>
+        <p id="dlForecastText" class="panel-note"></p>
       </section>
 
       <section class="panel-grid">

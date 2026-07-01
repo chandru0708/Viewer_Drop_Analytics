@@ -3,13 +3,20 @@ import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from scripts.nlp_engine import get_sentiment, get_top_keywords
+from scripts.dl_engine import simple_trend_forecast
+
+from scripts.nlp_engine import get_sentiment, get_top_keywords
+from scripts.dl_engine import simple_trend_forecast
 
 app = Flask(__name__)
 DATA_PATH = os.path.join("data", "raw", "Master_Entertainment_Data.xlsx")
 
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
+
 
 @app.route("/api/debug-data")
 def debug_data():
@@ -23,6 +30,7 @@ def debug_data():
         })
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 500
+
 
 def load_data():
     if not os.path.exists(DATA_PATH):
@@ -100,6 +108,7 @@ def load_data():
     df["session_month"] = df["session_date"].dt.to_period("M").astype(str)
     return df
 
+
 def apply_filters(df, filters):
     filtered = df.copy()
 
@@ -127,6 +136,7 @@ def apply_filters(df, filters):
 
     return filtered
 
+
 def add_anomaly_flags(df):
     out = df.copy()
     out["anomaly_low_completion"] = (out["completion_rate"] < 20).astype(int)
@@ -139,6 +149,7 @@ def add_anomaly_flags(df):
     ).astype(int)
     return out
 
+
 def compute_kpis(df):
     return {
         "total_sessions": int(df["session_id"].nunique()),
@@ -148,6 +159,7 @@ def compute_kpis(df):
         "anomaly_rate": round(float(df["anomaly_flag"].mean() * 100), 2),
         "avg_engagement_score": round(float(df["engagement_score"].mean()), 2)
     }
+
 
 def monthly_summary(df):
     return (
@@ -159,6 +171,7 @@ def monthly_summary(df):
         )
         .sort_values("session_month")
     )
+
 
 def category_summary(df, col, label):
     result = (
@@ -177,6 +190,7 @@ def category_summary(df, col, label):
     result["dropoff_rate_pct"] = result["dropoff_rate_pct"].round(2)
     return result.rename(columns={col: label})
 
+
 def daily_sessions(df):
     out = df.copy()
     out["session_day"] = pd.to_datetime(out["session_date"]).dt.normalize()
@@ -186,6 +200,7 @@ def daily_sessions(df):
         .rename(columns={"session_day": "session_date"})
         .sort_values("session_date")
     )
+
 
 def forecast_sessions(daily_df, periods=30):
     if len(daily_df) < 7:
@@ -212,6 +227,7 @@ def forecast_sessions(daily_df, periods=30):
         "lower_ci": np.round(np.maximum(vals - 1.96 * residual_std, 0), 2),
         "upper_ci": np.round(vals + 1.96 * residual_std, 2)
     })
+
 
 def compute_viewer_segmentation(df):
     base_date = df["session_date"].max() + pd.Timedelta(days=1)
@@ -291,6 +307,7 @@ def compute_viewer_segmentation(df):
 
     return viewer, segment_summary
 
+
 @app.route("/api/filter-options")
 def filter_options():
     try:
@@ -310,6 +327,7 @@ def filter_options():
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 500
 
+
 @app.route("/api/run-analysis", methods=["POST"])
 def run_analysis():
     try:
@@ -323,14 +341,24 @@ def run_analysis():
                 "message": "No data available for the selected filters."
             })
 
-        monthly = monthly_summary(filtered)
+        sample_text = payload.get(
+            "sample_text",
+            "The content has strong growth and positive engagement, but some users show weak retention."
+        )
+
         daily = daily_sessions(filtered)
         forecast = forecast_sessions(daily, periods=30)
+        viewer_table, segment_summary = compute_viewer_segmentation(filtered)
+        nlp_result = get_sentiment(sample_text)
+        keywords = get_top_keywords(sample_text, top_n=8)
+
+        series_for_dl = daily["sessions"].tolist() if len(daily) else filtered["watch_time_minutes"].tolist()
+        dl_result = simple_trend_forecast(series_for_dl, future_steps=7)
 
         return jsonify({
             "status": "success",
             "kpis": compute_kpis(filtered),
-            "monthly": monthly.to_dict(orient="records"),
+            "monthly": monthly_summary(filtered).to_dict(orient="records"),
             "genre_summary": category_summary(filtered, "genre", "genre").to_dict(orient="records"),
             "device_summary": category_summary(filtered, "device_type", "device_type").to_dict(orient="records"),
             "subscription_summary": category_summary(filtered, "subscription_plan", "subscription_plan").to_dict(orient="records"),
@@ -351,10 +379,16 @@ def run_analysis():
                     "upper_ci": float(r["upper_ci"])
                 }
                 for _, r in forecast.iterrows()
-            ]
+            ],
+            "segmentation_sample": viewer_table.head(20).to_dict(orient="records"),
+            "segment_summary": segment_summary.to_dict(orient="records"),
+            "nlp_result": nlp_result,
+            "keywords": keywords,
+            "dl_result": dl_result
         })
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 500
+
 
 @app.route("/api/segmentation", methods=["POST"])
 def segmentation():
@@ -377,6 +411,7 @@ def segmentation():
         })
     except Exception as exc:
         return jsonify({"status": "error", "message": str(exc)}), 500
+
 
 if __name__ == "__main__":
     print("STARTING FLASK APP")

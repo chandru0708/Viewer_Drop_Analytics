@@ -169,16 +169,45 @@ function renderViewerSample(rows) {
   rows.forEach(row => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${row.viewer_id}</td>
-      <td>${row.segment}</td>
-      <td>${row.F_score}</td>
-      <td>${row.M_score}</td>
-      <td>${row.R_score}</td>
-      <td>${row.avg_completion_rate}</td>
-      <td>${row.avg_engagement_score}</td>
+      <td>${row.viewer_id ?? "—"}</td>
+      <td>${row.segment ?? "—"}</td>
+      <td>${row.F_score ?? "—"}</td>
+      <td>${row.M_score ?? "—"}</td>
+      <td>${row.R_score ?? "—"}</td>
+      <td>${row.avg_completion_rate ?? "—"}</td>
+      <td>${row.avg_engagement_score ?? "—"}</td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+function renderNlp(nlpResult, keywords) {
+  document.getElementById("nlpSentiment").textContent = nlpResult.sentiment ?? "—";
+  document.getElementById("nlpPositiveScore").textContent = nlpResult.positive_score ?? "—";
+  document.getElementById("nlpNegativeScore").textContent = nlpResult.negative_score ?? "—";
+  document.getElementById("nlpCleanText").textContent = nlpResult.clean_text ? `Clean text: ${nlpResult.clean_text}` : "";
+
+  const wrap = document.getElementById("keywordChips");
+  wrap.innerHTML = "";
+
+  (keywords || []).forEach(item => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    const word = item.keyword ?? item[0] ?? "";
+    const count = item.count ?? item[1] ?? 0;
+    chip.textContent = `${word} (${count})`;
+    wrap.appendChild(chip);
+  });
+}
+
+function renderDl(dlResult) {
+  document.getElementById("dlTrend").textContent = dlResult.trend ?? "—";
+  document.getElementById("dlConfidence").textContent = dlResult.confidence ?? "—";
+
+  const forecast = Array.isArray(dlResult.forecast) ? dlResult.forecast : [];
+  document.getElementById("dlForecastText").textContent = forecast.length
+    ? `Next values: ${forecast.join(", ")}`
+    : "";
 }
 
 async function loadFilterOptions() {
@@ -210,6 +239,8 @@ async function runAnalysis() {
 
   renderKpis(json.kpis || {});
   renderMonthlyChart(json.monthly || []);
+  renderNlp(json.nlp_result || {}, json.keywords || []);
+  renderDl(json.dl_result || {});
 }
 
 async function loadSegmentation() {
@@ -232,7 +263,8 @@ async function loadSegmentation() {
 document.addEventListener("click", e => {
   if (e.target.matches(".chip[data-segment]")) {
     const segment = e.target.dataset.segment;
-    loadSegmentation({ segments: [segment] });
+    const legend = document.getElementById("segmentationLegend");
+    if (legend) legend.textContent = `Selected segment: ${segment}`;
   }
 });
 
