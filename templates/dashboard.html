@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viewer Insights Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-row">
+  <div class="brand-mark logo-wrap">
+    <img src="{{ url_for('static', filename='VDA_logo.png') }}" alt="Viewer Insights logo" class="brand-logo">
+  </div>
+  <div>
+    <p class="eyebrow">Analytics Platform</p>
+    <h1>Viewer Insights</h1>
+  </div>
+</div>
+
+      <section class="filter-card">
+        <h2>Filters</h2>
+        <p class="card-subtitle">Refine the analysis by audience, content, and time period.</p>
+
+        <div class="field-group">
+          <label for="genreFilter">Genre</label>
+          <select id="genreFilter" class="input-field"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="deviceFilter">Device Type</label>
+          <select id="deviceFilter" class="input-field"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="planFilter">Subscription Plan</label>
+          <select id="planFilter" class="input-field"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="contentTypeFilter">Content Type</label>
+          <select id="contentTypeFilter" class="input-field"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="regionFilter">Region</label>
+          <select id="regionFilter" class="input-field"></select>
+        </div>
+
+        
+        <div class="date-stack">
+  <div class="field-group">
+    <label for="startDate">Start Date</label>
+    <input type="date" id="startDate" class="input-field date-input">
+  </div>
+
+  <div class="field-group">
+    <label for="endDate">End Date</label>
+    <input type="date" id="endDate" class="input-field date-input">
+  </div>
+</div>
+        <button id="analysisBtn" class="primary-btn" type="button">Start Analysis</button>
+      </section>
+
+      <section class="filter-card">
+        <h2>Segments</h2>
+        <p class="card-subtitle">Live segment counts from the dataset.</p>
+        <div id="segmentChips" class="chip-group"></div>
+      </section>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+      <section class="hero-card">
+        <div class="hero-text">
+          <p class="eyebrow">Overview</p>
+          <h2>Behavior, retention, and audience mix in one view.</h2>
+          <p class="hero-copy">
+            Track viewer performance across genres, devices, plans, and time.
+            Use segmentation to spot champions, at-risk loyalists, and low-engagement cohorts.
+          </p>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <span class="kpi-label">Total Sessions</span>
+            <strong id="totalSessions">—</strong>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Total Viewers</span>
+            <strong id="totalViewers">—</strong>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Avg Completion</span>
+            <strong id="avgCompletion">—</strong>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Dropoff Rate</span>
+            <strong id="dropoffRate">—</strong>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Anomaly Rate</span>
+            <strong id="anomalyRate">—</strong>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">Engagement</span>
+            <strong id="avgEngagement">—</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel-grid">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Trend</p>
+              <h3>Monthly Sessions</h3>
+            </div>
+          </div>
+          <canvas id="monthlyChart" height="120"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Segmentation</p>
+              <h3>Viewer Segments</h3>
+            </div>
+          </div>
+          <p id="segmentationLegend" class="panel-note"></p>
+          <canvas id="segmentBarChart" height="120"></canvas>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Audience</p>
+            <h3>Viewer Sample</h3>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="segmentViewerTable">
+            <thead>
+              <tr>
+                <th>Viewer</th>
+                <th>Segment</th>
+                <th>F</th>
+                <th>M</th>
+                <th>R</th>
+                <th>Completion</th>
+                <th>Engagement</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
